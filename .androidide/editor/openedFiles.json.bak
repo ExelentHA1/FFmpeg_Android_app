@@ -1,0 +1,20 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ffmpeg_android/app/build.gradle",
+      "selection": {
+        "end": {
+          "column": 63,
+          "index": 838,
+          "line": 43
+        },
+        "start": {
+          "column": 63,
+          "index": 838,
+          "line": 43
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ffmpeg_android/app/build.gradle"
+}
