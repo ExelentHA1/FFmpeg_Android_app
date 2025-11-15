@@ -36,12 +36,13 @@
          android:padding="3dp"
          android:layout_weight="1">
 
-        <TextView
+        <androidx.recyclerview.widget.RecyclerView
              android:layout_height="match_parent"
-             android:layout_width="wrap_content"
+             android:layout_width="match_parent"
              android:scrollbars="vertical"
-             android:id="@+id/Out"
-             android:text="Output" />
+             android:background="#101010"
+             android:id="@+id/logRecycler"
+             android:overScrollMode="always" />
 
     </ScrollView>
 

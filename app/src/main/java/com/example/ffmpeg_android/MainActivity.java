@@ -1,23 +1,31 @@
 package com.example.ffmpeg_android;
 
-import com.arthenica.ffmpegkit.FFmpegKit;
+
+import android.util.Log;
 import com.arthenica.ffmpegkit.ReturnCode;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.arthenica.ffmpegkit.FFmpegKit;
 import com.arthenica.ffmpegkit.FFmpegSession;
+import com.arthenica.ffmpegkit.SessionState;
+import com.arthenica.ffmpegkit.Statistics;
 import com.example.ffmpeg_android.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private static final int REQUEST_STORAGE_PERMISSION = 1001;
-
+    
+    private LogAdapter logAdapter;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Ask for storage permission
         requestStoragePermission();
+        
+        RecyclerView logRecycler = findViewById(R.id.logRecycler);
+
+        logAdapter = new LogAdapter();
+        logRecycler.setAdapter(logAdapter);
+        logRecycler.setLayoutManager(new LinearLayoutManager(this));
 
         binding.buttonRun.setOnClickListener(v -> {
             String cmd = binding.cmd.getText().toString().trim();
@@ -35,16 +49,21 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter an FFmpeg command!", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            FFmpegKit.executeAsync(cmd, session -> {
+            
+            FFmpegKit.executeAsync(cmd, session ->  {
                 if (ReturnCode.isSuccess(session.getReturnCode())) {
-                    String output = session.getOutput();
-                    binding.Out.setText(output);
+                    logOnUI("FFmpeg finished successfully.");
                 } else {
-                    String fail = session.getFailStackTrace();
-                    String oute = session.getOutput();
-                    runOnUiThread(() -> binding.Out.setText("FFmpeg failed:\n" + oute));
+                   logOnUI("FFmpeg failed: " + session.getFailStackTrace());
                 }
+            }, log -> {
+                logOnUI(log.getMessage());
+            }, stats -> {
+                logOnUI(
+                    "time=" + stats.getTime() +
+                    " fps=" + stats.getVideoFps() +
+                    " speed=" + stats.getSpeed()
+                );
             });
         });
     }
@@ -73,6 +92,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    
+    private void logOnUI(String msg) {
+    runOnUiThread(() -> {
+            logAdapter.addLog(msg);
+            binding.logRecycler.smoothScrollToPosition(logAdapter.getItemCount() - 1);
+        });
+    }
+
 
     @Override
     protected void onDestroy() {
